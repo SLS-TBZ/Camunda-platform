@@ -6,7 +6,7 @@
 # For local development, we recommend using KIND instead of `docker-compose`:
 # https://docs.camunda.io/docs/self-managed/platform-deployment/helm-kubernetes/guides/local-kubernetes-cluster/
 
-# This is a full configuration with Zeebe, Operate, Tasklist, Optimize, Identity, Keycloak, and Elasticsearch
+# This is a full configuration with Zeebe, Operate, Tasklist, Optimize, Identity, Keycloak, Elasticsearch and optional Web Modeler.
 # See docker-compose-core.yml for a lightweight configuration that does not include Optimize, Identity, and Keycloak.
 
 services:
@@ -353,7 +353,7 @@ services:
 
   modeler-db:
     profiles:
-      - modeler
+      - web-modeler
     container_name: modeler-db
     image: postgres:${POSTGRES_VERSION}
     healthcheck:
@@ -366,7 +366,7 @@ services:
       POSTGRES_USER: modeler-db-user
       POSTGRES_PASSWORD: modeler-db-password
     networks:
-      - modeler
+      - web-modeler
     volumes:
       - postgres-web:/var/lib/postgresql/data
 
@@ -375,7 +375,7 @@ services:
     # and configure RESTAPI_MAIL_HOST, RESTAPI_MAIL_PORT, REST_API_MAIL_USER,
     # REST_API_MAIL_PASSWORD and RESTAPI_MAIL_ENABLE_TLS in modeler-restapi
     profiles:
-      - modeler
+      - web-modeler
     container_name: mailpit
     image: axllent/mailpit:${MAILPIT_VERSION}
     ports:
@@ -385,11 +385,11 @@ services:
       test: /usr/bin/nc -v localhost 1025
       interval: 30s
     networks:
-      - modeler
+      - web-modeler
 
   modeler-restapi:
     profiles:
-      - modeler
+      - web-modeler
     container_name: modeler-restapi
     image: registry.camunda.cloud/web-modeler-ee/modeler-restapi:${CAMUNDA_WEB_MODELER_VERSION}
     command: /bin/sh -c "java $JAVA_OPTIONS org.springframework.boot.loader.JarLauncher"
@@ -425,12 +425,12 @@ services:
       RESTAPI_MAIL_ENABLE_TLS: "false"
       RESTAPI_MAIL_FROM_ADDRESS: "noreply@example.com"
     networks:
-      - modeler
+      - web-modeler
       - camunda-platform
 
   modeler-webapp:
     profiles:
-      - modeler
+      - web-modeler
     container_name: modeler-webapp
     image: registry.camunda.cloud/web-modeler-ee/modeler-webapp:${CAMUNDA_WEB_MODELER_VERSION}
     ports:
@@ -464,12 +464,12 @@ services:
       IDENTITY_BASE_URL: http://identity:8084/
       PLAY_ENABLED: "true"
     networks:
-      - modeler
+      - web-modeler
       - camunda-platform
 
   modeler-websockets:
     profiles:
-      - modeler
+      - web-modeler
     container_name: modeler-websockets
     image: registry.camunda.cloud/web-modeler-ee/modeler-websockets:${CAMUNDA_WEB_MODELER_VERSION}
     ports:
@@ -485,7 +485,7 @@ services:
       PUSHER_APP_SECRET: modeler-app-secret
       PUSHER_APP_CLUSTER: modeler
     networks:
-      - modeler
+      - web-modeler
 
   kibana:
     image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION}
@@ -514,6 +514,9 @@ volumes:
 networks:
   # Note there are three bridge networks: One for Camunda Platform, one for Identity and one for Web Modeler.
   # Identity and Keycloak are part of the first two as they need to be accessible by platform components.
+  # Web Modeler has its own network because it consists of three components that communicate with each other.
+  # It is also part of the canunda-platform network to communicate with the platform components like Zeebe to run
+  # processes or Identity to log in.
   camunda-platform:
   identity-network:
-  modeler:
+  web-modeler:
