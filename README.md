@@ -163,20 +163,20 @@ $ docker login registry.camunda.cloud
 Username: your_username
 Password: ******
 Login Succeeded
-$ docker compose -f docker-compose.yaml -f docker-compose-web-modeler.yaml up -d
+$ docker compose --profile web-modeler up -d
 ```
 
 To tear down the whole environment run the following command
 
 ```
-$ docker compose -f docker-compose.yaml -f docker-compose-web-modeler.yaml down -v
+$ docker compose --profile web-modeler down -v
 ```
 
 If you want to delete everything (including any data you created).
 Alternatively, if you want to keep the data run:
 
 ```
-$ docker compose -f docker-compose.yaml -f docker-compose-web-modeler.yaml down
+$ docker compose --profile web-modeler down
 ```
 
 ### Login
