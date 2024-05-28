@@ -8,5 +8,5 @@ jobs:
     uses: ./.github/workflows/template-deploy.yaml
     secrets: inherit
     with:
-      compose_args: "--profile modeler"
+      compose_args: "--profile web-modeler"
       run_e2e_tests: true
